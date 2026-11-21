@@ -24,7 +24,6 @@ A*                241            3798         381.4
 - **Animation:** watch each solver explore the maze in colour
 - **Benchmark table:** path length, cells explored, and search time
 - **Reproducible:** `--seed` recreates the exact same maze
- 
 ## Build & run
 ```bash
 cmake -S . -B build
@@ -49,15 +48,26 @@ Or without CMake: `g++ -std=c++17 -O2 src/*.cpp -o pathpulse`
 - With **`--loops 15`**, DFS often returns a path several times longer than the optimum, while BFS and A* stay optimal.
 - **A\*** usually explores fewer cells than BFS, but on small mazes its priority queue overhead can make it *slower* in wall-clock time. Fewer cells explored is not the same as faster.
 - Generators have different "personalities": the backtracker makes long winding corridors, Prim's makes many short dead ends.
- 
 Try: `./pathpulse --size 40x80 --seed 1 --generator prim --loops 15`
  
+## Testing
+```bash
+cmake -S . -B build && cmake --build build
+cd build && ctest --output-on-failure
+```
+The test suite (`tests/test_pathpulse.cpp`, no external dependencies) checks that:
+- every generator keeps the outer border solid and produces a *perfect* maze (no loops, no unreachable cells)
+- the same `--seed` always recreates the same maze
+- every solver returns a valid path (starts at `S`, ends at `E`, moves only through open adjacent cells)
+- BFS and A* always find the shortest path, and DFS never beats it
+- unsolvable mazes are correctly reported as unsolvable
 ## Project layout
 ```
 src/Maze.*        grid, rendering
 src/Generators.*  backtracker, Prim, Kruskal, loop-adder
 src/Solvers.*     BFS, DFS, A*
 src/main.cpp      CLI parsing, animation, benchmark table
+tests/            automated test suite
 ```
  
 ## Ideas for next steps
